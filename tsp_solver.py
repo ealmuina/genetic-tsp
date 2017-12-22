@@ -1,12 +1,12 @@
 import argparse
-from math import sqrt
 import time
+from math import sqrt
 
-from adjacency import er
 import ga
 import mutation
-from path import pmx, mx, ox
 import tsp
+from adjacency import er
+from path import pmx, mx, ox
 
 
 def _distance(p1, p2):
@@ -63,7 +63,7 @@ def _print_table(table):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('method')
+    parser.add_argument('method', choices=('pmx', 'mx', 'ox', 'er'))
     parser.add_argument('problem_path')
     parser.add_argument('--optimum_path')
     parser.add_argument('--population', type=int, default=100)

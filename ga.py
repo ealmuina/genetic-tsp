@@ -3,8 +3,6 @@ import itertools
 import math
 import random
 
-import tsp
-
 
 class GeneticAlgorithm:
     def __init__(self, p, fcross, ffitness, fmutate):
@@ -38,9 +36,8 @@ class GeneticAlgorithm:
     def solve(self, population, generations):
         self.population = population
         m = 1 / len(population[0])  # probability of occurrence of mutations
-        g = 0
 
-        while g < generations:
+        for _ in range(generations):
             crossing_order = list(self.population)
             random.shuffle(crossing_order)
 
@@ -50,7 +47,6 @@ class GeneticAlgorithm:
                 children = self.fcross(c1, c2, 0.6)
                 self.population.extend(map(lambda c: self.fmutate(c, m), children))
 
-            g += 1
             m += random.random() / 10
             self._best_evolve()
 

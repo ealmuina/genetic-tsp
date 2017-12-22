@@ -1,9 +1,5 @@
 import random
 
-import tsp
-
-MAX_ITER = 1
-
 
 def _two_opt_swap(c, i, j):
     new_c = c[:]

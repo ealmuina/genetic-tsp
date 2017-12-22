@@ -1,10 +1,4 @@
 import random
-import time
-
-import datasets
-import ga
-import mutation
-import tsp
 
 
 def pmx(c1, c2, p):
@@ -62,18 +56,3 @@ def ox(c1, c2, p):
         return junior
 
     return [offspring(c1, c2), offspring(c2, c1)]
-
-
-if __name__ == '__main__':
-    costs, optimum = datasets.load('datasets/pr76.tsp.txt', 'datasets/pr76.opt.tour.txt')
-
-    solver_pmx = ga.GeneticAlgorithm(100, ox, lambda pop: tsp.fitness(pop, costs),
-                                     lambda c, p: mutation.two_opt(c, costs, p))
-
-    start = time.time()
-    solution = solver_pmx.solve(tsp.random_population(100, len(costs)), 100)
-
-    print('SOLUTION\tOPTIMUM\t\tTIME')
-    print('%.2f' % tsp.evaluate(solution, costs), '%.2f' % tsp.evaluate(optimum, costs),
-          '%.2f' % ((time.time() - start) / 60), sep='\t')
-    print(solution)

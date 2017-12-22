@@ -1,10 +1,6 @@
 import bisect
 import random
 
-import datasets
-import ga
-import tsp
-
 
 def cross(c1, c2, p):
     if random.random() > p:
@@ -32,11 +28,3 @@ def encode(c):
         result.append(i)
         canonic.pop(i)
     return result
-
-
-if __name__ == '__main__':
-    costs, optimum = datasets.load('datasets/pr76.tsp.txt', 'datasets/pr76.opt.tour.txt')
-
-    solver = ga.GeneticAlgorithm(1000, cross, lambda pop: tsp.fitness(pop, costs), tsp.mutate)
-    solution = solver.solve(tsp.random_population(1000, len(costs)), 100)
-    print(tsp.evaluate(solution, costs), tsp.evaluate(optimum, costs))
