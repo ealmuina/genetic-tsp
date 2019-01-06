@@ -34,10 +34,11 @@ class GeneticAlgorithm:
         self.population = [x[0] for x in population[:self.p]]
 
     def solve(self, population, generations):
+        bests = []
         self.population = population
         m = 1 / len(population[0])  # probability of occurrence of mutations
 
-        for _ in range(generations):
+        for i in range(generations):
             crossing_order = list(self.population)
             random.shuffle(crossing_order)
 
@@ -49,7 +50,9 @@ class GeneticAlgorithm:
 
             m += random.random() / 10
             self._best_evolve()
+            bests.append(self.population[-1])
 
-        fitness = self.ffitness(self.population)
-        pos = max(range(self.p), key=lambda i: fitness[i])
-        return self.population[pos]
+        # fitness = self.ffitness(self.population)
+        # pos = max(range(self.p), key=lambda i: fitness[i])
+        # return self.population[pos]
+        return bests

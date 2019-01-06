@@ -2,6 +2,8 @@ import argparse
 import time
 from math import sqrt
 
+import matplotlib.pyplot as plt
+
 import ga
 import mutation
 import tsp
@@ -11,6 +13,39 @@ from path import pmx, mx, ox
 
 def _distance(p1, p2):
     return sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+
+
+def _draw_evolution(bests, costs, optimum_cost):
+    fig, ax = plt.subplots(figsize=(8, 4))
+
+    c = list(map(
+        lambda x: tsp.evaluate(x, costs) - optimum_cost,
+        bests
+    ))
+
+    ax.plot(c)
+    fig.show()
+
+
+def _draw_path(solution, positions):
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.scatter(*zip(*positions.values()))
+
+    x, y = [], []
+
+    for i in range(len(solution)):
+        ax.annotate(i, positions[i])
+        pos = positions[solution[i]]
+        x.append(pos[0])
+        y.append(pos[1])
+
+    x.append(x[0])
+    y.append(y[0])
+    ax.plot(x, y)
+
+    ax.axis('off')
+
+    fig.show()
 
 
 def _load(problem, optimum_path):
@@ -47,7 +82,7 @@ def _load(problem, optimum_path):
                         break
                     optimum.append(city - 1)
 
-    return costs, optimum
+    return costs, optimum, positions
 
 
 def _print_table(table):
@@ -64,16 +99,24 @@ def _print_table(table):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('method', choices=('pmx', 'mx', 'ox', 'er'))
+    parser.add_argument('mutation', choices=('none', '2opt', 'swap'))
     parser.add_argument('problem_path')
     parser.add_argument('--optimum_path')
     parser.add_argument('--population', type=int, default=100)
     parser.add_argument('--generations', type=int, default=100)
-    parser.add_argument('--tests', type=int, default=30)
+    parser.add_argument('--tests', type=int, default=3)
+    parser.add_argument('--graphic', action='store_true')
     args = parser.parse_args()
 
     method = {'pmx': pmx, 'mx': mx, 'ox': ox, 'er': er}[args.method.lower()]
+    mutation_op = {
+        'none': lambda route, costs, p: route,
+        '2opt': lambda route, costs, p: mutation.two_opt(route, costs, p),
+        'swap': lambda route, costs, p: mutation.swap(route, p)
+    }[args.mutation.lower()]
+
     solutions_sum = 0.0
-    costs, optimum = _load(args.problem_path, args.optimum_path)
+    costs, optimum, positions = _load(args.problem_path, args.optimum_path)
     optimum_times = 0
 
     if optimum:
@@ -85,15 +128,23 @@ def main():
             args.population,
             method,
             lambda pop: tsp.fitness(pop, costs),
-            lambda c, p: mutation.two_opt(c, costs, p)
+            lambda c, p: mutation_op(c, costs, p)
         )
         start = time.time()
-        solution = solver.solve(tsp.random_population(args.population, len(costs)), args.generations)
+        bests = solver.solve(
+            tsp.random_population(args.population, len(costs)),
+            args.generations,
+        )
+        solution = bests[-1]
         solution_cost = tsp.evaluate(solution, costs)
         solutions_sum += solution_cost
 
         if optimum and abs(solution_cost - optimum_cost) < 1e-3:
             optimum_times += 1
+
+        if args.graphic:
+            _draw_path(solution, positions)
+            _draw_evolution(bests, costs, optimum_cost if optimum else 0)
 
         output.append((
             '%.2f' % solution_cost,
